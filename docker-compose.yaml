@@ -1,0 +1,187 @@
+
+version: "3.10"
+
+services:
+
+# Pipelines
+  etl_pipeline_e2e:
+    build:
+      context: ./etl_pipeline_e2e
+      dockerfile: ./Dockerfile
+    container_name: etl_pipeline_e2e
+    image: etl_pipeline:latest
+    depends_on:
+      DE_PSQL:
+        condition: service_completed_successfully
+    volumes:
+      - ./etl_pipeline_e2e:/opt/dagster/app
+    env_file:
+      - .env
+    networks:
+      - de_network
+    ports:
+      - "4000:4000"
+
+# DBT_pipeline
+  dbt_pipeline_e2e:
+    build:
+      context: ./etl_pipeline_e2e/dbt_pipeline_e2e
+      dockerfile: ./Dockerfile
+    image: dbt_pipeline:latest
+    container_name: dbt_pipeline_e2e
+    depends_on:
+      load_data:
+        condition: service_completed_successfully
+    volumes:
+      - ./dbt_pipeline_e2e:/opt/dagster/app
+    env_file:
+      - .env
+    networks:
+      - de_network
+    ports:
+      - "4001:4001"
+
+# De_PSQL
+  DE_PSQL:
+    image: postgres:15
+    container_name: DE_PSQL
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin123
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    networks:
+      - de_network
+
+# Minio
+  DE_MINIO:
+    hostname: minio
+    image: minio/minio
+    container_name: DE_MINIO
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    command: [ "server", "/data", "--console-address", ":9001" ]
+    volumes:
+      - ./minio:/data
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+
+# MySQL
+  DE_MYSQL:
+    image: mysql:8.0
+    container_name: DE_MYSQL
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    networks:
+      - de_network
+
+# Jupyter
+  JUPYTER:
+    image: "jupyter/all-spark-notebook:python-3.8"
+    container_name: JUPYTER
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./jupyter:/home/jovyan/work
+    networks:
+      - de_network
+
+# Dagster
+  DE_DAGSTER:
+    build:
+      context: ./dagster
+    container_name: DE_DAGSTER
+    depends_on:
+      DE_PSQL:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    image: de_dagster
+
+  DE_DAGSTER_DAGIT:
+    image: de_dagster:latest
+    entrypoint:
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3001"
+      - -w
+      - workspace.yaml
+    container_name: DE_DAGSTER_DAGIT
+    expose:
+      - "3001"
+    ports:
+      - "3001:3001"
+    volumes: # Make docker client accessible, so we can terminate containers from dagit
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./dagster_home:/opt/dagster/dagster_home
+    env_file:
+      - .env
+    networks:
+      - de_network
+
+  DE_DAGSTER_DAEMON:
+    image: de_dagster:latest
+    entrypoint:
+      - dagster-daemon
+      - run
+      - -w
+      - workspace.yaml
+    container_name: DE_DAGSTER_DAEMON
+    volumes: # Make docker client accessible, so we can launch containers using host docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./dagster_home:/opt/dagster/dagster_home
+    env_file:
+      - .env
+    networks:
+      - de_network
+
+# Data
+  init_data:
+      build:
+        context: ./datasource_init
+        dockerfile: ./Dockerfile
+      container_name: INIT_DATA
+      env_file:
+        - .env
+      depends_on:
+        DE_PSQL:
+          condition: service_completed_successfully
+      networks:
+        - de_network
+
+  load_data:
+    build:
+      context: ./datasource_load
+      dockerfile: ./Dockerfile
+    container_name: LOAD_DATA
+    env_file:
+      - .env
+    depends_on:
+      init_data:
+        condition: service_completed_successfully
+    volumes:
+      - ./data:/usr/src/app/data
+    networks:
+      - de_network
+
+networks:
+  de_network:
+    driver: bridge
+    name: de_network
