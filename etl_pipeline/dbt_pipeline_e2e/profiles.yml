@@ -1,0 +1,24 @@
+# File: env.template
+
+dbt_pipeline_e2e:
+  outputs:
+    dev:
+      dbname: postgres # postgres
+      host: DE_PSQL # localhost
+      pass: admin123 #sinhnhattao
+      port: 5432
+      schema: dbt_pipeline_e2e # dbt_pipeline_e2e
+      threads: 15
+      type: postgres
+      user: admin #postgres
+    prod:
+      dbname: postgres # postgres
+      host: DE_PSQL #localhost
+      pass: admin123 #sinhnhattao
+      port: 5432
+      schema: gold # gold
+      threads: 15
+      type: postgres
+      user: admin #postgres
+  target: dev
+
