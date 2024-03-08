@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: raw_categories
+    columns:
+      - name: product_category_name
+        data_type: "varchar"
+      - name: product_category_name_english
+        data_type: "varchar"
+  - name: raw_customers
+    columns:
+      - name: customer_id
+        data_type: "varchar"
+        tests:
+          - not_null
+      - name: customer_unique_id
+        data_type: "varchar"
+        tests:
+          - not_null
+      - name: customer_city
+        data_type: "varchar"
+      - name: customer_state
+        data_type: "varchar"
+      - name: customer_zip_code_prefix
+        data_type: "int"
+  - name: raw_geolocations
+    columns:
+      - name: geolocation_zip_code_prefix
+        data_type: "int"
+      - name: geolocation_lat
+        data_type: "float"
+      - name: geolocation_lng
+        data_type: "float"
+      - name: geolocation_city
+        data_type: "varchar"
+      - name: geolocation_state
+        data_type: "varchar"
+  - name: raw_order_items
+    columns:
+      - name: order_id
+        data_type: "varchar"
+        tests:
+          - not_null
+      - name: order_item_id
+        data_type: "int"
+        tests:
+          - not_null
+      - name: product_id
+        data_type: "varchar"
+        tests:
+          - not_null
+      - name: seller_id
+        data_type: "varchar"
+        tests:
+          - not_null
+  - name: raw_order_payments
+    columns:
+      - name: order_id
+        data_type: "varchar"
+        tests:
+          - not_null
+      - name: payment_sequential
+        data_type: "int"
+  - name: raw_orders
+    columns:
+      - name: order_id
+        data_type: "varchar"
+        tests:
+          - not_null
+      - name: order_status
+        data_type: "varchar"
+        accepted_value:
+          ["delivered", "unavailable", "shipped", "canceled", "invoiced", "processing", "approved", "created"]
+  - name: raw_products
+    columns:
+      - name: product_id
+        data_type: "varchar"
+        tests:
+          - not_null
+  - name: raw_sellers
+    columns:
+      - name: seller_id
+        data_type: "varchar"
+        tests:
+          - not_null
