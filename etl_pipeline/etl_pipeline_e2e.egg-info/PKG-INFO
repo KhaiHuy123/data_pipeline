@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: etl_pipeline_e2e
+Version: 0.0.0
+Requires-Dist: dagster
+Requires-Dist: dagster-postgres
+Requires-Dist: spark
+Requires-Dist: scrapy
+Requires-Dist: selenium
+Requires-Dist: dagster_pandas
+Requires-Dist: dagster_dbt
+Requires-Dist: dagstermill
+Requires-Dist: papermill
+Requires-Dist: minio
+Requires-Dist: mysql-connector-python
+Requires-Dist: psycopg2-binary
+Requires-Dist: basemap
+Requires-Dist: geos
+Provides-Extra: dev
+Requires-Dist: dagster-webserver; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
