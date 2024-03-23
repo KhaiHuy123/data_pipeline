@@ -5,10 +5,6 @@ from dagster_dbt import dbt_assets, DbtCliResource, get_asset_key_for_model
 DBT_PROJECT_PATH = file_relative_path(__file__, "..\\..\\..\\dbt_pipeline_e2e")
 DBT_PROFILES_PATH = file_relative_path(__file__, "..\\..\\..\\dbt_pipeline_e2e")
 MANIFEST_PATH = file_relative_path(__file__, "..\\..\\..\\dbt_pipeline_e2e\\target\\manifest.json")
-# DBT_PROJECT_PATH = file_relative_path(__file__, "../../../dbt_pipeline_e2e")
-# DBT_PROFILES_PATH = file_relative_path(__file__, "../../../dbt_pipeline_e2e")
-# MANIFEST_PATH = file_relative_path(__file__, "../../../dbt_pipeline_e2e/target/manifest.json")
-
 
 @dbt_assets(
     manifest=MANIFEST_PATH,
