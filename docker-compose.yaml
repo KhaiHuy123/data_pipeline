@@ -1,4 +1,3 @@
-
 version: "3.10"
 
 services:
@@ -10,9 +9,6 @@ services:
       dockerfile: ./Dockerfile
     container_name: etl_pipeline_e2e
     image: etl_pipeline:latest
-    depends_on:
-      DE_PSQL:
-        condition: service_completed_successfully
     volumes:
       - ./etl_pipeline_e2e:/opt/dagster/app
     env_file:
@@ -83,10 +79,10 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=mydatabase
-      - MYSQL_USER=myuser
-      - MYSQL_PASSWORD=mypassword
+      - MYSQL_ROOT_PASSWORD=mysql_root_password
+      - MYSQL_DATABASE=mysql_database
+      - MYSQL_USER=mysql_user
+      - MYSQL_PASSWORD=mysql_password
     networks:
       - de_network
 
@@ -105,10 +101,8 @@ services:
   DE_DAGSTER:
     build:
       context: ./dagster
+      dockerfile: ./Dockerfile
     container_name: DE_DAGSTER
-    depends_on:
-      DE_PSQL:
-        condition: service_completed_successfully
     env_file:
       - .env
     image: de_dagster
