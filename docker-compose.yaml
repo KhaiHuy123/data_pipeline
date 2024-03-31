@@ -106,7 +106,9 @@ services:
     env_file:
       - .env
     image: de_dagster
-
+    networks:
+      - de_network
+      
   DE_DAGSTER_DAGIT:
     image: de_dagster:latest
     entrypoint:
